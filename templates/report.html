@@ -3,620 +3,525 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KubeCon EU 2026 - {{ profile.name }} Report</title>
+<title>KubeCon EU 2026 - {{ profile.name }}</title>
 <style>
-  :root {
-    --green: #16a34a; --blue: #2563eb; --amber: #d97706;
-    --gray: #6b7280; --light-gray: #d1d5db;
-    --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b;
-    --border: #e2e8f0; --shadow: rgba(0,0,0,0.08);
-    --red: #dc2626;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--bg); color: var(--text); line-height: 1.6;
-  }
-  .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f1f5f9;color:#1e293b;line-height:1.5}
+.container{max-width:1400px;margin:0 auto;padding:16px}
 
-  /* Header */
-  .header {
-    background: linear-gradient(135deg, #1e40af, #7c3aed);
-    color: white; padding: 30px; border-radius: 12px; margin-bottom: 24px;
-  }
-  .header h1 { font-size: 1.8em; margin-bottom: 4px; }
-  .header .subtitle { opacity: 0.9; font-size: 1.1em; }
-  .stats {
-    display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap;
-  }
-  .stat { background: rgba(255,255,255,0.15); padding: 8px 16px; border-radius: 8px; }
-  .stat-value { font-size: 1.4em; font-weight: 700; }
-  .stat-label { font-size: 0.85em; opacity: 0.85; }
+.header{background:linear-gradient(135deg,#1e40af,#7c3aed);color:#fff;padding:28px;border-radius:12px;margin-bottom:20px}
+.header h1{font-size:1.6em;margin-bottom:2px}
+.header .sub{opacity:.9;font-size:1em}
+.stats{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap}
+.stat{background:rgba(255,255,255,.15);padding:6px 14px;border-radius:8px}
+.stat b{font-size:1.3em;display:block}
+.stat span{font-size:.8em;opacity:.85}
 
-  /* Score legend */
-  .legend {
-    background: var(--card-bg); padding: 12px 20px; border-radius: 10px;
-    border: 1px solid var(--border); margin-bottom: 16px;
-    display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
-    font-size: 0.85em;
-  }
-  .legend-title { font-weight: 700; }
-  .legend-item { display: flex; align-items: center; gap: 4px; }
-  .legend-dot {
-    width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0;
-  }
+.legend{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:.82em;padding:10px 16px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:14px}
+.legend b{margin-right:2px}
+.dot{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:middle;margin-right:3px}
 
-  /* View toggle */
-  .view-toggle {
-    display: flex; gap: 4px; background: var(--card-bg); border: 1px solid var(--border);
-    border-radius: 8px; padding: 3px; margin-bottom: 16px; width: fit-content;
-  }
-  .view-btn {
-    padding: 6px 16px; border-radius: 6px; border: none; cursor: pointer;
-    font-size: 0.9em; font-weight: 600; background: transparent; color: var(--gray);
-    transition: all 0.2s;
-  }
-  .view-btn.active { background: #4f46e5; color: white; }
-  .view-btn:hover:not(.active) { background: #eef2ff; }
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;padding:12px 16px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:16px}
+.controls label{font-weight:600;font-size:.85em}
+.controls input[type=range]{width:100px;accent-color:#4f46e5}
+.controls input[type=text]{padding:5px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:.85em;width:180px}
+.controls select{padding:5px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:.85em}
+.ctrl{display:flex;align-items:center;gap:5px}
+.toggle{display:flex;gap:2px;background:#e2e8f0;border-radius:6px;padding:2px}
+.toggle button{padding:5px 14px;border:none;border-radius:5px;font-size:.85em;font-weight:600;cursor:pointer;background:transparent;color:#64748b}
+.toggle button.on{background:#4f46e5;color:#fff}
 
-  /* Filters */
-  .filters {
-    background: var(--card-bg); padding: 16px 20px; border-radius: 10px;
-    border: 1px solid var(--border); margin-bottom: 20px;
-    display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
-  }
-  .filters label { font-weight: 600; font-size: 0.9em; white-space: nowrap; }
-  .filters input[type=range] { width: 140px; accent-color: #4f46e5; }
-  .filters input[type=text] {
-    padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px;
-    font-size: 0.9em; width: 200px;
-  }
-  .filters select {
-    padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px;
-    font-size: 0.9em;
-  }
-  .filter-group { display: flex; align-items: center; gap: 6px; }
-  .filter-toggle {
-    cursor: pointer; user-select: none; display: flex; align-items: center; gap: 4px;
-  }
+/* Day tabs */
+.tabs{display:flex;gap:3px;margin-bottom:16px;flex-wrap:wrap}
+.tab{padding:8px 18px;border-radius:8px 8px 0 0;cursor:pointer;background:#fff;border:1px solid #e2e8f0;border-bottom:none;font-weight:600;font-size:.9em}
+.tab:hover{background:#eef2ff}
+.tab.on{background:#4f46e5;color:#fff}
+.day{display:none}.day.on{display:block}
+.view{display:none}.view.on{display:block}
 
-  /* Top Picks */
-  .top-picks-section {
-    display: none; margin-bottom: 24px;
-  }
-  .top-picks-section.active { display: block; }
-  .top-picks-day {
-    margin-bottom: 20px;
-  }
-  .top-picks-day h3 {
-    font-size: 1.1em; color: #4f46e5; margin-bottom: 10px;
-    padding-bottom: 6px; border-bottom: 2px solid #4f46e5;
-  }
-  .pick-card {
-    display: flex; gap: 12px; align-items: center; padding: 10px 14px;
-    background: var(--card-bg); border: 1px solid var(--border);
-    border-radius: 8px; margin-bottom: 6px;
-    transition: all 0.2s;
-  }
-  .pick-card:hover { box-shadow: 0 2px 8px var(--shadow); }
-  .pick-score {
-    min-width: 42px; height: 42px; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.1em; font-weight: 800; color: white; flex-shrink: 0;
-  }
-  .pick-time {
-    font-size: 0.85em; color: var(--gray); font-weight: 600;
-    min-width: 100px;
-  }
-  .pick-title { font-weight: 600; flex: 1; }
-  .pick-title a { color: inherit; text-decoration: none; }
-  .pick-title a:hover { text-decoration: underline; }
-  .pick-location { font-size: 0.8em; color: var(--gray); min-width: 120px; text-align: right; }
+/* Top Picks */
+.picks-intro{color:#64748b;font-size:.88em;margin-bottom:14px}
+.picks-day{margin-bottom:18px}
+.picks-day h3{font-size:1em;color:#4f46e5;border-bottom:2px solid #4f46e5;padding-bottom:4px;margin-bottom:8px}
+.pick{display:flex;gap:10px;align-items:center;padding:8px 12px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:5px}
+.pick:hover{box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.pick .sc{min-width:38px;height:38px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:1em;font-weight:800;color:#fff;flex-shrink:0}
+.pick .tm{font-size:.82em;color:#64748b;font-weight:600;min-width:95px}
+.pick .ti{font-weight:600;flex:1}
+.pick .ti a{color:inherit;text-decoration:none}
+.pick .ti a:hover{text-decoration:underline}
+.pick .loc{font-size:.78em;color:#94a3b8;text-align:right}
 
-  /* Day tabs */
-  .schedule-view { display: none; }
-  .schedule-view.active { display: block; }
-  .day-tabs {
-    display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap;
-  }
-  .day-tab {
-    padding: 10px 20px; border-radius: 8px 8px 0 0; cursor: pointer;
-    background: var(--card-bg); border: 1px solid var(--border);
-    border-bottom: none; font-weight: 600; font-size: 0.95em;
-    transition: all 0.2s;
-  }
-  .day-tab:hover { background: #eef2ff; }
-  .day-tab.active { background: #4f46e5; color: white; }
-  .day-content { display: none; }
-  .day-content.active { display: block; }
+/* ===== CALENDAR SCHEDULE GRID ===== */
+.cal-empty{text-align:center;padding:40px;color:#94a3b8;font-size:1em}
+.cal-block{display:flex;border-bottom:1px solid #e2e8f0;min-height:52px}
+.cal-block:last-child{border-bottom:none}
+.cal-time-col{width:72px;flex-shrink:0;padding:10px 10px 10px 0;text-align:right;font-size:.82em;font-weight:700;color:#64748b;border-right:2px solid #e2e8f0;position:relative}
+.cal-time-col .cal-time-main{color:#1e293b}
+.cal-events-col{flex:1;padding:8px 0 8px 12px;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start}
 
-  /* Timeslot */
-  .timeslot {
-    margin-bottom: 28px; position: relative;
-  }
-  .timeslot-header {
-    font-size: 1.05em; font-weight: 700; color: #4f46e5;
-    margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
-    padding: 8px 14px; background: #eef2ff; border-radius: 8px;
-    position: sticky; top: 0; z-index: 10;
-  }
-  .timeslot-event-count {
-    font-size: 0.8em; font-weight: 400; color: var(--gray);
-  }
-  .conflict-badge {
-    background: #fef2f2; color: var(--red); padding: 3px 10px;
-    border-radius: 6px; font-size: 0.75em; font-weight: 700;
-    display: flex; align-items: center; gap: 4px;
-    border: 1px solid #fecaca;
-  }
+/* Calendar event card */
+.cal-card{width:280px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:0;cursor:pointer;transition:all .15s;overflow:hidden;display:flex;flex-direction:row}
+.cal-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1);transform:translateY(-1px)}
+.cal-card.conflict{border-color:#fca5a5;box-shadow:0 0 0 1px #fca5a5}
+.cal-card .cal-score-bar{width:44px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;gap:1px}
+.cal-card .cal-score-num{font-size:1.15em;font-weight:800;line-height:1}
+.cal-card .cal-score-tier{font-size:.55em;font-weight:600;text-transform:uppercase;opacity:.9}
+.cal-card .cal-body{flex:1;padding:7px 10px;min-width:0}
+.cal-card .cal-title{font-size:.82em;font-weight:700;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;margin-bottom:3px}
+.cal-card .cal-meta{font-size:.72em;color:#94a3b8;display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.cal-card .cal-meta .cal-dur{font-weight:600;color:#64748b}
+.cal-card .cal-conflict-badge{display:inline-flex;align-items:center;gap:2px;font-size:.65em;color:#dc2626;font-weight:700;background:#fef2f2;padding:1px 5px;border-radius:3px;margin-top:2px}
 
-  /* Conflict group wrapper */
-  .conflict-group {
-    border: 2px dashed #e5e7eb; border-radius: 12px; padding: 12px;
-    margin-bottom: 12px; position: relative;
-  }
-  .conflict-group-label {
-    position: absolute; top: -10px; left: 16px; padding: 0 8px;
-    background: var(--bg); font-size: 0.75em; font-weight: 700;
-    border-radius: 4px;
-  }
-  .conflict-group-recommendation {
-    font-size: 0.8em; padding: 6px 12px; border-radius: 6px;
-    margin-bottom: 8px; font-weight: 600;
-  }
+/* Event detail panel (shown on click) */
+.detail-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:100;justify-content:center;align-items:center;padding:20px}
+.detail-overlay.open{display:flex}
+.detail-panel{background:#fff;border-radius:12px;max-width:700px;width:100%;max-height:85vh;overflow-y:auto;padding:24px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.detail-close{position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.5em;cursor:pointer;color:#94a3b8;line-height:1}
+.detail-close:hover{color:#1e293b}
+.detail-panel h2{font-size:1.15em;margin-bottom:4px;padding-right:30px}
+.detail-panel h2 a{color:inherit;text-decoration:none}
+.detail-panel h2 a:hover{color:#4f46e5;text-decoration:underline}
+.detail-meta{display:flex;gap:8px;flex-wrap:wrap;font-size:.85em;color:#64748b;margin-bottom:12px;align-items:center}
+.detail-meta .sep{color:#e2e8f0}
+.detail-score-row{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.detail-score-badge{min-width:54px;height:54px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff}
+.detail-score-badge .num{font-size:1.5em;font-weight:800;line-height:1}
+.detail-score-badge .lbl{font-size:.55em;font-weight:600;text-transform:uppercase;opacity:.9}
+.detail-bars{flex:1;display:flex;gap:10px;flex-wrap:wrap}
+.detail-bars .bar-g{flex:1;min-width:100px}
+.bar-lbl{display:flex;justify-content:space-between;font-size:.72em;color:#94a3b8;margin-bottom:1px}
+.bar{height:7px;background:#e5e7eb;border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.detail-reason{font-size:.88em;color:#475569;padding:8px 10px;background:#f8fafc;border-radius:6px;border-left:3px solid #cbd5e1;margin-bottom:10px}
+.detail-conflicts{margin-bottom:10px}
+.detail-conflicts summary{font-size:.85em;font-weight:600;color:#dc2626;cursor:pointer;padding:4px 0}
+.detail-conflicts .conf-list{font-size:.82em;padding:6px 0 6px 16px;color:#64748b}
+.detail-conflicts .conf-list li{margin-bottom:2px}
+.detail-conflicts .conf-list .conf-score{font-weight:700;margin-right:4px}
+.detail-desc{font-size:.85em;padding:10px;background:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-wrap:break-word}
+.cat{display:inline-block;padding:1px 7px;border-radius:3px;font-size:.72em;background:#eef2ff;color:#4338ca;font-weight:600}
 
-  /* Event card */
-  .event-card {
-    background: var(--card-bg); border: 1px solid var(--border);
-    border-radius: 10px; padding: 16px; margin-bottom: 8px;
-    box-shadow: 0 1px 3px var(--shadow); transition: all 0.2s;
-    position: relative;
-  }
-  .event-card:last-child { margin-bottom: 0; }
-  .event-card:hover { box-shadow: 0 4px 12px var(--shadow); }
-  .event-card.has-conflict { border-left: 4px solid var(--red); }
-  .event-card.best-pick {
-    box-shadow: 0 0 0 2px #16a34a40, 0 2px 8px var(--shadow);
-  }
-  .best-pick-badge {
-    position: absolute; top: -8px; right: 12px; background: var(--green);
-    color: white; font-size: 0.7em; font-weight: 700; padding: 2px 8px;
-    border-radius: 4px;
-  }
-  .event-top { display: flex; gap: 12px; align-items: flex-start; }
+/* List view cards */
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 12px rgba(0,0,0,.07)}
+.card.conf{border-left:4px solid #ef4444}
+.card .badge{min-width:50px;height:50px;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+.card .badge .num{font-size:1.3em;font-weight:800;line-height:1}
+.card .badge .lbl{font-size:.5em;font-weight:600;opacity:.9;text-transform:uppercase}
+.card .body{flex:1;min-width:0}
+.card .title{font-size:1em;font-weight:700;margin-bottom:3px}
+.card .title a{color:inherit;text-decoration:none}
+.card .title a:hover{color:#4f46e5;text-decoration:underline}
+.card .meta{display:flex;gap:6px;flex-wrap:wrap;font-size:.8em;color:#94a3b8;margin-bottom:6px}
+.card .meta .sep{color:#e2e8f0}
+.conf-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:#fef2f2;border:1px solid #fecaca;border-radius:5px;font-size:.76em;color:#dc2626;margin:3px 0}
+.bars{display:flex;gap:8px;margin:5px 0;flex-wrap:wrap}
+.bars .bar-g{flex:1;min-width:90px}
+.reason{font-size:.84em;color:#475569;padding:5px 9px;background:#f8fafc;border-radius:5px;border-left:3px solid #cbd5e1;margin-top:4px}
+.desc-btn{background:none;border:none;color:#2563eb;cursor:pointer;font-size:.8em;padding:3px 0;font-weight:600}
+.desc-btn:hover{text-decoration:underline}
+.desc{display:none;margin-top:6px;padding:10px;background:#f8fafc;border-radius:6px;font-size:.84em;border:1px solid #e2e8f0;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-wrap:break-word}
+.desc.open{display:block}
+.ts{margin-bottom:22px}
+.ts-head{display:flex;align-items:center;gap:8px;padding:7px 12px;background:#eef2ff;border-radius:7px;margin-bottom:10px;position:sticky;top:0;z-index:10;font-weight:700;font-size:.95em;color:#4f46e5}
+.ts-count{font-size:.78em;font-weight:400;color:#94a3b8}
+.ts-conflict{background:#fef2f2;color:#dc2626;padding:2px 8px;border-radius:5px;font-size:.72em;font-weight:700;border:1px solid #fecaca}
 
-  .score-badge {
-    min-width: 56px; height: 56px; border-radius: 10px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    color: white; flex-shrink: 0;
-  }
-  .score-number { font-size: 1.4em; font-weight: 800; line-height: 1; }
-  .score-label { font-size: 0.55em; font-weight: 600; opacity: 0.9; text-transform: uppercase; }
+.footer{text-align:center;padding:16px;color:#94a3b8;font-size:.8em;margin-top:16px}
+.empty{text-align:center;padding:30px;color:#94a3b8;font-size:1em}
 
-  .event-info { flex: 1; min-width: 0; }
-  .event-title {
-    font-size: 1.05em; font-weight: 700; margin-bottom: 4px;
-    word-wrap: break-word;
-  }
-  .event-title a { color: inherit; text-decoration: none; }
-  .event-title a:hover { text-decoration: underline; color: #4f46e5; }
-  .event-meta {
-    display: flex; gap: 8px; flex-wrap: wrap; font-size: 0.82em;
-    color: var(--gray); margin-bottom: 8px; align-items: center;
-  }
-  .meta-item {
-    display: flex; align-items: center; gap: 3px; white-space: nowrap;
-  }
-  .meta-divider { color: var(--light-gray); }
-
-  /* Conflict info on card */
-  .conflict-info {
-    margin: 8px 0; padding: 8px 12px; border-radius: 6px;
-    font-size: 0.82em; display: flex; align-items: flex-start; gap: 6px;
-  }
-  .conflict-info-icon { flex-shrink: 0; font-size: 1.1em; }
-  .conflict-info-text { }
-  .conflict-info strong { }
-
-  /* Score breakdown */
-  .score-breakdown {
-    display: flex; gap: 10px; margin: 8px 0; flex-wrap: wrap;
-  }
-  .score-bar-group { flex: 1; min-width: 110px; }
-  .score-bar-label {
-    font-size: 0.72em; color: var(--gray); margin-bottom: 2px;
-    display: flex; justify-content: space-between;
-  }
-  .score-bar {
-    height: 7px; background: #e5e7eb; border-radius: 4px; overflow: hidden;
-  }
-  .score-bar-fill {
-    height: 100%; border-radius: 4px; transition: width 0.3s;
-  }
-
-  .reasoning {
-    font-size: 0.88em; color: #475569; margin-top: 6px;
-    padding: 6px 10px; background: #f8fafc; border-radius: 6px;
-    border-left: 3px solid #cbd5e1;
-  }
-
-  /* Expandable description */
-  .expand-btn {
-    background: none; border: none; color: var(--blue); cursor: pointer;
-    font-size: 0.82em; padding: 4px 0; font-weight: 600;
-  }
-  .expand-btn:hover { text-decoration: underline; }
-  .event-description {
-    display: none; margin-top: 8px; padding: 12px;
-    background: #f1f5f9; border-radius: 6px; font-size: 0.88em;
-    white-space: pre-wrap; word-wrap: break-word; max-height: 300px;
-    overflow-y: auto; border: 1px solid var(--border);
-  }
-  .event-description.expanded { display: block; }
-
-  .category-tag {
-    display: inline-block; padding: 2px 8px; border-radius: 4px;
-    font-size: 0.72em; background: #eef2ff; color: #4338ca;
-    font-weight: 600;
-  }
-
-  .no-conflict-card {
-    margin-bottom: 8px;
-  }
-
-  .footer {
-    text-align: center; padding: 20px; color: var(--gray);
-    font-size: 0.85em; margin-top: 20px;
-  }
-
-  .empty-state {
-    text-align: center; padding: 40px; color: var(--gray);
-    font-size: 1.1em;
-  }
-
-  @media (max-width: 768px) {
-    .container { padding: 12px; }
-    .header { padding: 20px; }
-    .header h1 { font-size: 1.3em; }
-    .stats { gap: 10px; }
-    .filters { flex-direction: column; align-items: stretch; }
-    .score-breakdown { flex-direction: column; }
-    .pick-card { flex-wrap: wrap; }
-    .pick-location { text-align: left; min-width: auto; }
-  }
+@media(max-width:768px){
+  .container{padding:10px}.header{padding:18px}.header h1{font-size:1.2em}
+  .controls{flex-direction:column;align-items:stretch}
+  .card{flex-direction:column}
+  .detail-panel{margin:10px;padding:16px}
+  .cal-card{width:100%}
+  .cal-time-col{width:56px;font-size:.75em}
+}
+@media(min-width:1200px){
+  .cal-card{width:260px}
+}
 </style>
 </head>
 <body>
 <div class="container">
-  <!-- Header -->
-  <div class="header">
-    <h1>KubeCon + CloudNativeCon EU 2026</h1>
-    <div class="subtitle">Personalized Schedule for {{ profile.name }} ({{ profile.role }})</div>
-    <div class="stats">
-      <div class="stat">
-        <div class="stat-value">{{ total_events }}</div>
-        <div class="stat-label">Events Scored</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value">{{ must_attend }}</div>
-        <div class="stat-label">Must-Attend (85+)</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value">{{ recommended }}</div>
-        <div class="stat-label">Recommended (70+)</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value">{{ total_conflicts }}</div>
-        <div class="stat-label">Conflicts</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value">{{ avg_score }}</div>
-        <div class="stat-label">Avg Score</div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Score Legend -->
-  <div class="legend">
-    <span class="legend-title">Scores:</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#16a34a;"></span> 85+ Must-attend</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#2563eb;"></span> 70-84 Recommended</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#d97706;"></span> 50-69 Consider</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#6b7280;"></span> 30-49 Low</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#d1d5db;"></span> &lt;30 Skip</span>
-    <span style="margin-left: 12px;" class="legend-title">Conflicts:</span>
-    <span class="legend-item" style="border-left:4px solid var(--red); padding-left:6px;">Red border = time overlap</span>
-    <span class="legend-item" style="box-shadow: 0 0 0 2px #16a34a80; border-radius:4px; padding: 2px 6px;">Green glow = AI top pick</span>
-  </div>
-
-  <!-- View Toggle -->
-  <div class="view-toggle">
-    <button class="view-btn active" onclick="switchView('schedule')">Full Schedule</button>
-    <button class="view-btn" onclick="switchView('picks')">Top Picks (conflict-free)</button>
-  </div>
-
-  <!-- Filters -->
-  <div class="filters">
-    <div class="filter-group">
-      <label>Min Score:</label>
-      <input type="range" id="scoreFilter" min="0" max="100" value="{{ min_score }}" oninput="filterEvents()">
-      <span id="scoreValue" style="min-width:24px; text-align:center; font-weight:700;">{{ min_score }}</span>
-    </div>
-    <div class="filter-group">
-      <label>Search:</label>
-      <input type="text" id="searchFilter" placeholder="Search titles..." oninput="filterEvents()">
-    </div>
-    <div class="filter-group">
-      <label>Category:</label>
-      <select id="categoryFilter" onchange="filterEvents()">
-        <option value="">All Categories</option>
-        {% for cat in categories %}
-        <option value="{{ cat }}">{{ cat }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div class="filter-group">
-      <label class="filter-toggle">
-        <input type="checkbox" id="conflictOnlyFilter" onchange="filterEvents()">
-        Conflicts only
-      </label>
-    </div>
-  </div>
-
-  <!-- TOP PICKS VIEW -->
-  <div class="top-picks-section" id="view-picks">
-    <p style="color: var(--gray); font-size: 0.9em; margin-bottom: 16px;">
-      Your optimal conflict-free schedule: the highest-scoring sessions with no time overlaps.
-    </p>
-    {% for day_key, picks in top_picks.items() %}
-    {% if picks %}
-    <div class="top-picks-day">
-      <h3>{{ picks[0].event.day_display }} ({{ picks|length }} sessions)</h3>
-      {% for se in picks %}
-      <div class="pick-card">
-        <div class="pick-score" style="background: {{ se.score_color }}">{{ se.score }}</div>
-        <div class="pick-time">{{ se.event.time_range }}</div>
-        <div class="pick-title">
-          {% if se.event.url %}
-          <a href="{{ se.event.url }}" target="_blank" rel="noopener">{{ se.event.summary }}</a>
-          {% else %}
-          {{ se.event.summary }}
-          {% endif %}
-        </div>
-        <div class="pick-location">{{ se.event.location }}</div>
-      </div>
-      {% endfor %}
-    </div>
-    {% endif %}
-    {% endfor %}
-  </div>
-
-  <!-- FULL SCHEDULE VIEW -->
-  <div class="schedule-view active" id="view-schedule">
-    <!-- Day Tabs -->
-    <div class="day-tabs">
-      {% for day_key, day_info in days.items() %}
-      <div class="day-tab {% if loop.first %}active{% endif %}" onclick="switchDay('{{ day_key }}')">
-        {{ day_info.display }}
-        <span style="font-weight:400; font-size:0.85em;">({{ day_info.event_count }})</span>
-      </div>
-      {% endfor %}
-    </div>
-
-    <!-- Day Contents -->
-    {% for day_key, day_info in days.items() %}
-    <div class="day-content {% if loop.first %}active{% endif %}" id="day-{{ day_key }}">
-      {% if day_info.timeslots %}
-        {% for ts_info in day_info.timeslots %}
-        {% set ts = ts_info.timeslot %}
-        {% set events = ts_info.events %}
-        <div class="timeslot" data-has-conflicts="{{ 'true' if ts_info.conflict_count > 0 else 'false' }}">
-          <div class="timeslot-header">
-            {{ ts.time_range }}
-            <span class="timeslot-event-count">{{ events|length }} session{{ 's' if events|length != 1 }}</span>
-            {% if ts_info.conflict_count > 0 %}
-            <span class="conflict-badge">
-              {{ ts_info.conflict_count }} OVERLAPPING
-            </span>
-            {% endif %}
-          </div>
-
-          {# Group conflicting events together, show non-conflicting ones individually #}
-          {% set ns = namespace(shown=[], current_group=-1) %}
-          {% for ae in events %}
-            {% set se = ae.scored_event %}
-            {% set conf = ae.conflict %}
-
-            {% if conf %}
-              {# Start a new conflict group if this is a new group_id #}
-              {% if conf.group_id != ns.current_group %}
-                {% if ns.current_group != -1 %}</div>{% endif %}
-                {% set ns.current_group = conf.group_id %}
-                <div class="conflict-group" style="border-color: {{ conf.color }}40;">
-                  <span class="conflict-group-label" style="color: {{ conf.color }};">
-                    Choose 1 of {{ conf.group_size }}
-                  </span>
-                  <div class="conflict-group-recommendation" style="background: {{ conf.color }}10; color: {{ conf.color }};">
-                    AI recommends: {{ events[0].scored_event.event.summary if conf.best_in_group else se.event.summary }}
-                  </div>
-              {% endif %}
-              <div class="event-card has-conflict {% if conf.best_in_group %}best-pick{% endif %}"
-                   style="border-left-color: {{ conf.color }};"
-                   data-score="{{ se.score }}"
-                   data-title="{{ se.event.summary|lower }}"
-                   data-categories="{{ se.event.categories|join(',') }}"
-                   data-conflict="true">
-                {% if conf.best_in_group %}
-                <div class="best-pick-badge">TOP PICK</div>
-                {% endif %}
-            {% else %}
-              {# Close any open conflict group #}
-              {% if ns.current_group != -1 %}
-                </div>
-                {% set ns.current_group = -1 %}
-              {% endif %}
-              <div class="no-conflict-card">
-              <div class="event-card"
-                   data-score="{{ se.score }}"
-                   data-title="{{ se.event.summary|lower }}"
-                   data-categories="{{ se.event.categories|join(',') }}"
-                   data-conflict="false">
-            {% endif %}
-
-                <div class="event-top">
-                  <div class="score-badge" style="background: {{ se.score_color }}">
-                    <span class="score-number">{{ se.score }}</span>
-                    <span class="score-label">{{ se.score_tier }}</span>
-                  </div>
-                  <div class="event-info">
-                    <div class="event-title">
-                      {% if se.event.url %}
-                      <a href="{{ se.event.url }}" target="_blank" rel="noopener">{{ se.event.summary }}</a>
-                      {% else %}
-                      {{ se.event.summary }}
-                      {% endif %}
-                    </div>
-                    <div class="event-meta">
-                      <span class="meta-item">{{ se.event.time_range }}</span>
-                      <span class="meta-divider">|</span>
-                      <span class="meta-item">{{ se.event.duration_minutes }} min</span>
-                      {% if se.event.location %}
-                      <span class="meta-divider">|</span>
-                      <span class="meta-item">{{ se.event.location }}</span>
-                      {% endif %}
-                      {% for cat in se.event.categories %}
-                      <span class="category-tag">{{ cat }}</span>
-                      {% endfor %}
-                    </div>
-
-                    {% if conf %}
-                    <div class="conflict-info" style="background: {{ conf.color }}08; border: 1px solid {{ conf.color }}20;">
-                      <span class="conflict-info-icon" style="color: {{ conf.color }};">&#x26A0;</span>
-                      <span class="conflict-info-text">
-                        <strong style="color: {{ conf.color }};">Conflicts with:</strong>
-                        {{ conf.conflicts_with|join(', ') }}
-                      </span>
-                    </div>
-                    {% endif %}
-
-                    <div class="score-breakdown">
-                      <div class="score-bar-group">
-                        <div class="score-bar-label">
-                          <span>Role Relevance</span>
-                          <span>{{ se.role_relevance }}/35</span>
-                        </div>
-                        <div class="score-bar">
-                          <div class="score-bar-fill" style="width: {{ (se.role_relevance / 35 * 100)|round }}%; background: {{ se.score_color }};"></div>
-                        </div>
-                      </div>
-                      <div class="score-bar-group">
-                        <div class="score-bar-label">
-                          <span>Topic Alignment</span>
-                          <span>{{ se.topic_alignment }}/35</span>
-                        </div>
-                        <div class="score-bar">
-                          <div class="score-bar-fill" style="width: {{ (se.topic_alignment / 35 * 100)|round }}%; background: {{ se.score_color }};"></div>
-                        </div>
-                      </div>
-                      <div class="score-bar-group">
-                        <div class="score-bar-label">
-                          <span>Strategic Value</span>
-                          <span>{{ se.strategic_value }}/30</span>
-                        </div>
-                        <div class="score-bar">
-                          <div class="score-bar-fill" style="width: {{ (se.strategic_value / 30 * 100)|round }}%; background: {{ se.score_color }};"></div>
-                        </div>
-                      </div>
-                    </div>
-                    {% if se.reasoning %}
-                    <div class="reasoning">{{ se.reasoning }}</div>
-                    {% endif %}
-                    {% if se.event.description %}
-                    <button class="expand-btn" onclick="toggleDesc(this)">Show full description</button>
-                    <div class="event-description">{{ se.event.description }}</div>
-                    {% endif %}
-                  </div>
-                </div>
-              </div>
-              {% if not conf %}</div>{% endif %}
-          {% endfor %}
-          {# Close last conflict group if open #}
-          {% if ns.current_group != -1 %}</div>{% endif %}
-        </div>
-        {% endfor %}
-      {% else %}
-      <div class="empty-state">No events for this day.</div>
-      {% endif %}
-    </div>
-    {% endfor %}
-  </div>
-
-  <div class="footer">
-    Generated {{ generated_at }} | Profile: {{ profile.name }} | Provider: {{ provider_name }}
+<div class="header">
+  <h1>KubeCon + CloudNativeCon EU 2026</h1>
+  <div class="sub">{{ profile.name }} &mdash; {{ profile.role }}{% if profile.organization %}, {{ profile.organization }}{% endif %}</div>
+  <div class="stats">
+    <div class="stat"><b>{{ total_events }}</b><span>Scored</span></div>
+    <div class="stat"><b>{{ must_attend }}</b><span>Must-Attend</span></div>
+    <div class="stat"><b>{{ recommended }}</b><span>Recommended</span></div>
+    <div class="stat"><b>{{ total_conflict_slots }}</b><span>Conflict Slots</span></div>
+    <div class="stat"><b>{{ avg_score }}</b><span>Avg Score</span></div>
   </div>
 </div>
 
+<div class="legend">
+  <b>Scores:</b>
+  <span><span class="dot" style="background:#16a34a"></span>85+ Must-attend</span>
+  <span><span class="dot" style="background:#2563eb"></span>70-84 Recommended</span>
+  <span><span class="dot" style="background:#d97706"></span>50-69 Consider</span>
+  <span><span class="dot" style="background:#6b7280"></span>30-49 Low</span>
+  <span><span class="dot" style="background:#d1d5db"></span>&lt;30 Skip</span>
+  <span style="margin-left:8px;border-left:2px solid #ef4444;padding-left:6px;color:#dc2626;font-weight:600">Red border = time conflict</span>
+  <span style="margin-left:8px"><b>Click</b> any event for details</span>
+</div>
+
+<div class="controls">
+  <div class="toggle" id="viewToggle">
+    <button class="on" onclick="setView('calendar',this)">Schedule</button>
+    <button onclick="setView('list',this)">Full List</button>
+    <button onclick="setView('picks',this)">Top Picks</button>
+  </div>
+  <div class="ctrl">
+    <label>Min Score:</label>
+    <input type="range" id="fScore" min="0" max="100" value="{{ min_score }}" oninput="applyFilters()">
+    <span id="fScoreVal" style="min-width:22px;text-align:center;font-weight:700">{{ min_score }}</span>
+  </div>
+  <div class="ctrl">
+    <label>Search:</label>
+    <input type="text" id="fSearch" placeholder="Search titles..." oninput="applyFilters()">
+  </div>
+  <div class="ctrl">
+    <label>Category:</label>
+    <select id="fCat" onchange="applyFilters()">
+      <option value="">All Categories</option>
+      {% for cat in categories %}<option value="{{ cat }}">{{ cat }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="ctrl">
+    <label>Conflicts:</label>
+    <select id="fConf" onchange="applyFilters()">
+      <option value="">All</option>
+      <option value="yes">Conflicts only</option>
+      <option value="no">No conflicts</option>
+    </select>
+  </div>
+</div>
+
+<!-- Detail overlay -->
+<div class="detail-overlay" id="detailOverlay" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-panel" id="detailPanel"></div>
+</div>
+
+<!-- TOP PICKS -->
+<div class="view" id="v-picks">
+  <p class="picks-intro">Optimal conflict-free schedule: highest-scoring sessions with no time overlaps.</p>
+  {% for day_key, picks in top_picks.items() %}{% if picks %}
+  <div class="picks-day">
+    <h3>{{ picks[0].event.day_display }} &mdash; {{ picks|length }} sessions</h3>
+    {% for se in picks %}
+    <div class="pick" onclick="showDetail('{{ se.event.uid|replace("'", "\\'") }}')" style="cursor:pointer">
+      <div class="sc" style="background:{{ se.score_color }}">{{ se.score }}</div>
+      <div class="tm">{{ se.event.time_range }}</div>
+      <div class="ti">{{ se.event.summary }}</div>
+      <div class="loc">{{ se.event.location }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}{% endfor %}
+</div>
+
+<!-- CALENDAR / SCHEDULE VIEW -->
+<div class="view on" id="v-calendar">
+  <div class="tabs" id="calTabs">
+    {% for day_key, day_info in days.items() %}
+    <div class="tab {% if loop.first %}on{% endif %}" onclick="switchDay('{{ day_key }}',this)">
+      {{ day_info.display }} <span style="font-weight:400;font-size:.82em">({{ day_info.event_count }})</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% for day_key, day_info in days.items() %}
+  <div class="day {% if loop.first %}on{% endif %}" id="d-{{ day_key }}">
+    <div id="cal-{{ day_key }}"></div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- LIST VIEW -->
+<div class="view" id="v-list">
+  <div class="tabs" id="listTabs">
+    {% for day_key, day_info in days.items() %}
+    <div class="tab {% if loop.first %}on{% endif %}" onclick="switchDayList('{{ day_key }}',this)">
+      {{ day_info.display }} <span style="font-weight:400;font-size:.82em">({{ day_info.event_count }})</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% for day_key, day_info in days.items() %}
+  <div class="day {% if loop.first %}on{% endif %}" id="dl-{{ day_key }}">
+    {% for ts_info in day_info.timeslots %}
+    {% set ts = ts_info.timeslot %}
+    <div class="ts">
+      <div class="ts-head">
+        {{ ts.time_range }}
+        <span class="ts-count">{{ ts_info.events|length }} session{{ 's' if ts_info.events|length != 1 }}</span>
+        {% if ts_info.has_conflicts %}<span class="ts-conflict">OVERLAPPING</span>{% endif %}
+      </div>
+      {% for ae in ts_info.events %}
+      {% set se = ae.scored_event %}
+      <div class="card {% if ae.has_conflict %}conf{% endif %}"
+           data-score="{{ se.score }}" data-title="{{ se.event.summary|lower }}"
+           data-cats="{{ se.event.categories|join(',') }}" data-conf="{{ ae.has_conflict|lower }}">
+        <div class="badge" style="background:{{ se.score_color }}">
+          <span class="num">{{ se.score }}</span><span class="lbl">{{ se.score_tier }}</span>
+        </div>
+        <div class="body">
+          <div class="title">{% if se.event.url %}<a href="{{ se.event.url }}" target="_blank" rel="noopener">{{ se.event.summary }}</a>{% else %}{{ se.event.summary }}{% endif %}</div>
+          <div class="meta">
+            <span>{{ se.event.time_range }}</span><span class="sep">|</span><span>{{ se.event.duration_minutes }}min</span>
+            {% if se.event.location %}<span class="sep">|</span><span>{{ se.event.location }}</span>{% endif %}
+            {% for cat in se.event.categories %}<span class="cat">{{ cat }}</span>{% endfor %}
+          </div>
+          {% if ae.has_conflict %}
+          <div class="conf-chip">&#x26A0; Overlaps with {{ ae.conflict_names|join('; ') }}{% if ae.conflict_extra > 0 %} +{{ ae.conflict_extra }} more{% endif %}</div>
+          {% endif %}
+          <div class="bars">
+            <div class="bar-g"><div class="bar-lbl"><span>Role</span><span>{{ se.role_relevance }}/35</span></div><div class="bar"><div class="bar-fill" style="width:{{ (se.role_relevance / 35 * 100)|round }}%;background:{{ se.score_color }}"></div></div></div>
+            <div class="bar-g"><div class="bar-lbl"><span>Topic</span><span>{{ se.topic_alignment }}/35</span></div><div class="bar"><div class="bar-fill" style="width:{{ (se.topic_alignment / 35 * 100)|round }}%;background:{{ se.score_color }}"></div></div></div>
+            <div class="bar-g"><div class="bar-lbl"><span>Strategic</span><span>{{ se.strategic_value }}/30</span></div><div class="bar"><div class="bar-fill" style="width:{{ (se.strategic_value / 30 * 100)|round }}%;background:{{ se.score_color }}"></div></div></div>
+          </div>
+          {% if se.reasoning %}<div class="reason">{{ se.reasoning }}</div>{% endif %}
+          {% if se.event.description %}<button class="desc-btn" onclick="toggleDesc(this)">Show description</button><div class="desc">{{ se.event.description }}</div>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+
+<div class="footer">Generated {{ generated_at }} | {{ profile.name }} | {{ provider_name }}</div>
+</div>
+
 <script>
-function switchView(view) {
-  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById('view-schedule').classList.toggle('active', view === 'schedule');
-  document.getElementById('view-picks').classList.toggle('active', view === 'picks');
+// All event data
+const ALL_EVENTS = {{ event_data | safe }};
+
+// ---- View switching ----
+function setView(v, btn) {
+  document.querySelectorAll('#viewToggle button').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  ['v-calendar','v-list','v-picks'].forEach(id => {
+    document.getElementById(id).classList.toggle('on', id === 'v-' + v);
+  });
+  if (v === 'calendar') renderAllCalendars();
+}
+function switchDay(d, el) {
+  el.closest('.view').querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  el.closest('.view').querySelectorAll('.day').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('d-' + d).classList.add('on');
+  renderCalendar(d);
+}
+function switchDayList(d, el) {
+  el.closest('.view').querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  el.closest('.view').querySelectorAll('.day').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('dl-' + d).classList.add('on');
 }
 
-function switchDay(day) {
-  document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.day-content').forEach(c => c.classList.remove('active'));
-  event.target.closest('.day-tab').classList.add('active');
-  document.getElementById('day-' + day).classList.add('active');
+// ---- Schedule grid calendar rendering ----
+function getFilters() {
+  return {
+    minScore: parseInt(document.getElementById('fScore').value) || 0,
+    query: document.getElementById('fSearch').value.toLowerCase(),
+    cat: document.getElementById('fCat').value,
+    conf: document.getElementById('fConf').value,
+  };
 }
 
-function filterEvents() {
-  const minScore = parseInt(document.getElementById('scoreFilter').value);
-  document.getElementById('scoreValue').textContent = minScore;
-  const search = document.getElementById('searchFilter').value.toLowerCase();
-  const category = document.getElementById('categoryFilter').value;
-  const conflictOnly = document.getElementById('conflictOnlyFilter').checked;
+function filterEvents(events, filters) {
+  return events.filter(e => {
+    if (e.score < filters.minScore) return false;
+    if (filters.query && !e.title.toLowerCase().includes(filters.query)) return false;
+    if (filters.cat && !e.categories.includes(filters.cat)) return false;
+    if (filters.conf === 'yes' && !e.hasConflict) return false;
+    if (filters.conf === 'no' && e.hasConflict) return false;
+    return true;
+  });
+}
 
-  document.querySelectorAll('.event-card').forEach(card => {
-    const score = parseInt(card.dataset.score);
-    const title = card.dataset.title || '';
-    const cats = card.dataset.categories || '';
-    const isConflict = card.dataset.conflict === 'true';
+function renderCalendar(dayKey) {
+  const container = document.getElementById('cal-' + dayKey);
+  if (!container) return;
 
-    let show = score >= minScore;
-    if (show && search) show = title.includes(search);
-    if (show && category) show = cats.includes(category);
-    if (show && conflictOnly) show = isConflict;
+  const filters = getFilters();
+  let events = ALL_EVENTS.filter(e => e.day === dayKey);
+  events = filterEvents(events, filters);
+  events.sort((a, b) => a.startMin - b.startMin || b.score - a.score);
 
-    card.style.display = show ? '' : 'none';
+  if (events.length === 0) {
+    container.innerHTML = '<div class="cal-empty">No events match filters for this day.</div>';
+    return;
+  }
+
+  // Group events by start time, rounded to 15-min blocks
+  const blocks = new Map();
+  events.forEach(ev => {
+    const blockMin = Math.floor(ev.startMin / 15) * 15;
+    if (!blocks.has(blockMin)) blocks.set(blockMin, []);
+    blocks.get(blockMin).push(ev);
   });
 
-  // Hide empty conflict groups
-  document.querySelectorAll('.conflict-group').forEach(group => {
-    const visible = group.querySelectorAll('.event-card:not([style*="display: none"])');
-    group.style.display = visible.length === 0 ? 'none' : '';
+  // Sort blocks by time
+  const sortedBlocks = [...blocks.entries()].sort((a, b) => a[0] - b[0]);
+
+  let html = '';
+  sortedBlocks.forEach(([blockMin, blockEvents]) => {
+    // Sort events within block: highest score first
+    blockEvents.sort((a, b) => b.score - a.score);
+
+    const h = Math.floor(blockMin / 60);
+    const m = blockMin % 60;
+    const timeStr = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+
+    html += '<div class="cal-block">';
+    html += `<div class="cal-time-col"><span class="cal-time-main">${timeStr}</span></div>`;
+    html += '<div class="cal-events-col">';
+
+    blockEvents.forEach(ev => {
+      const confClass = ev.hasConflict ? 'conflict' : '';
+      const confBadge = ev.hasConflict
+        ? '<div class="cal-conflict-badge">&#x26A0; Conflict</div>'
+        : '';
+
+      // Determine number of direct conflicts for this event
+      const conflictCount = ALL_EVENTS.filter(o =>
+        o.uid !== ev.uid && o.day === ev.day
+        && o.startMin < ev.endMin && ev.startMin < o.endMin
+      ).length;
+
+      const confDetail = conflictCount > 0
+        ? `<div class="cal-conflict-badge">&#x26A0; ${conflictCount} overlap${conflictCount > 1 ? 's' : ''}</div>`
+        : '';
+
+      html += `<div class="cal-card ${confClass}" onclick="showDetail('${ev.uid.replace(/'/g, "\\'")}')">
+        <div class="cal-score-bar" style="background:${ev.scoreColor}">
+          <span class="cal-score-num">${ev.score}</span>
+          <span class="cal-score-tier">${ev.tier}</span>
+        </div>
+        <div class="cal-body">
+          <div class="cal-title">${escHtml(ev.title)}</div>
+          <div class="cal-meta">
+            <span class="cal-dur">${ev.duration}min</span>
+            <span>${ev.timeRange}</span>
+            ${ev.location ? `<span>&middot; ${escHtml(ev.location)}</span>` : ''}
+          </div>
+          ${confDetail}
+        </div>
+      </div>`;
+    });
+
+    html += '</div></div>';
   });
 
-  // Hide empty no-conflict wrappers
-  document.querySelectorAll('.no-conflict-card').forEach(wrap => {
-    const card = wrap.querySelector('.event-card');
-    if (card) wrap.style.display = card.style.display;
-  });
+  container.innerHTML = html;
+}
 
-  // Hide empty timeslots
-  document.querySelectorAll('.timeslot').forEach(ts => {
-    const cards = ts.querySelectorAll('.event-card');
-    const anyVisible = Array.from(cards).some(c => c.style.display !== 'none');
-    ts.style.display = anyVisible ? '' : 'none';
+function renderAllCalendars() {
+  document.querySelectorAll('#v-calendar .day.on').forEach(d => {
+    const dayKey = d.id.replace('d-', '');
+    renderCalendar(dayKey);
+  });
+}
+
+// ---- Detail panel ----
+function showDetail(uid) {
+  const ev = ALL_EVENTS.find(e => e.uid === uid);
+  if (!ev) return;
+
+  const conflicts = ALL_EVENTS.filter(o => o.uid !== uid && o.day === ev.day
+    && o.startMin < ev.endMin && ev.startMin < o.endMin)
+    .sort((a, b) => b.score - a.score);
+
+  let confHtml = '';
+  if (conflicts.length > 0) {
+    const items = conflicts.slice(0, 8).map(c =>
+      `<li><span class="conf-score" style="color:${c.scoreColor}">[${c.score}]</span> ${escHtml(c.title)} (${c.timeRange})</li>`
+    ).join('');
+    const extra = conflicts.length > 8 ? `<li>...and ${conflicts.length - 8} more</li>` : '';
+    confHtml = `<div class="detail-conflicts">
+      <details open><summary>&#x26A0; ${conflicts.length} overlapping session${conflicts.length>1?'s':''}</summary>
+      <ul class="conf-list">${items}${extra}</ul></details></div>`;
+  }
+
+  document.getElementById('detailPanel').innerHTML = `
+    <button class="detail-close" onclick="closeDetail()">&times;</button>
+    <h2>${ev.url ? `<a href="${ev.url}" target="_blank" rel="noopener">${escHtml(ev.title)}</a>` : escHtml(ev.title)}</h2>
+    <div class="detail-meta">
+      <span>${ev.dayDisplay}</span><span class="sep">|</span>
+      <span>${ev.timeRange}</span><span class="sep">|</span>
+      <span>${ev.duration}min</span>
+      ${ev.location ? `<span class="sep">|</span><span>${escHtml(ev.location)}</span>` : ''}
+      ${ev.categories.map(c => `<span class="cat">${escHtml(c)}</span>`).join('')}
+    </div>
+    <div class="detail-score-row">
+      <div class="detail-score-badge" style="background:${ev.scoreColor}">
+        <span class="num">${ev.score}</span>
+        <span class="lbl">${ev.tier}</span>
+      </div>
+      <div class="detail-bars">
+        <div class="bar-g"><div class="bar-lbl"><span>Role Relevance</span><span>${ev.role}/35</span></div><div class="bar"><div class="bar-fill" style="width:${Math.round(ev.role/35*100)}%;background:${ev.scoreColor}"></div></div></div>
+        <div class="bar-g"><div class="bar-lbl"><span>Topic Alignment</span><span>${ev.topic}/35</span></div><div class="bar"><div class="bar-fill" style="width:${Math.round(ev.topic/35*100)}%;background:${ev.scoreColor}"></div></div></div>
+        <div class="bar-g"><div class="bar-lbl"><span>Strategic Value</span><span>${ev.strategic}/30</span></div><div class="bar"><div class="bar-fill" style="width:${Math.round(ev.strategic/30*100)}%;background:${ev.scoreColor}"></div></div></div>
+      </div>
+    </div>
+    ${ev.reasoning ? `<div class="detail-reason">${escHtml(ev.reasoning)}</div>` : ''}
+    ${confHtml}
+    ${ev.description ? `<div class="detail-desc">${escHtml(ev.description)}</div>` : ''}
+  `;
+  document.getElementById('detailOverlay').classList.add('open');
+}
+function closeDetail() { document.getElementById('detailOverlay').classList.remove('open'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+// ---- Filters ----
+function applyFilters() {
+  const min = parseInt(document.getElementById('fScore').value);
+  document.getElementById('fScoreVal').textContent = min;
+
+  // Re-render schedule calendar
+  renderAllCalendars();
+
+  // Filter list view cards
+  const q = document.getElementById('fSearch').value.toLowerCase();
+  const cat = document.getElementById('fCat').value;
+  const conf = document.getElementById('fConf').value;
+  document.querySelectorAll('#v-list .card').forEach(c => {
+    let ok = parseInt(c.dataset.score) >= min;
+    if (ok && q) ok = (c.dataset.title || '').includes(q);
+    if (ok && cat) ok = (c.dataset.cats || '').includes(cat);
+    if (ok && conf === 'yes') ok = c.dataset.conf === 'true';
+    if (ok && conf === 'no') ok = c.dataset.conf !== 'true';
+    c.style.display = ok ? '' : 'none';
+  });
+  document.querySelectorAll('#v-list .ts').forEach(ts => {
+    const any = Array.from(ts.querySelectorAll('.card')).some(c => c.style.display !== 'none');
+    ts.style.display = any ? '' : 'none';
   });
 }
 
 function toggleDesc(btn) {
-  const desc = btn.nextElementSibling;
-  const expanded = desc.classList.toggle('expanded');
-  btn.textContent = expanded ? 'Hide description' : 'Show full description';
+  const d = btn.nextElementSibling;
+  const open = d.classList.toggle('open');
+  btn.textContent = open ? 'Hide description' : 'Show description';
 }
+
+function escHtml(s) {
+  if (!s) return '';
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// Initial render
+window.addEventListener('load', () => renderAllCalendars());
 </script>
 </body>
 </html>
