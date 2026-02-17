@@ -86,6 +86,14 @@ context: "We run 50+ clusters, migrating to GitOps..."
 
 See `profiles/example.yaml` for full documentation of all fields.
 
+### Tip: Use AI to generate your profile
+
+Instead of writing your profile from scratch, ask an AI assistant (like Claude Code, ChatGPT, or Copilot) to generate it for you. Give it a few bullet points about yourself and it can fill in the rest:
+
+> "I'm a DevOps / cloud native engineer at Acme Corp. My main interests are Crossplane, AI on Kubernetes, and platform engineering. I'm advanced level and prefer hands-on deep dives. Generate a kubecon scorer YAML profile for me."
+
+The AI can pull from your GitHub repos, job title, and tech stack to create a well-rounded profile with relevant interests, priorities, and context. Much faster than filling in every field manually.
+
 ## Report Features
 
 - **Day tabs**: Navigate between co-located events (Mar 23) and main conference days (Mar 24-26)
