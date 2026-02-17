@@ -1,0 +1,55 @@
+# KubeCon EU 2026 Event Scorer - Profile Configuration
+#
+# This file defines your attendee profile for personalized event scoring.
+# All fields are optional except 'name' and 'role'.
+
+# Display name for the report
+name: "Example Attendee"
+
+# Your job title/role - heavily influences scoring
+role: "Software Engineer"
+
+# Your company (provides context for strategic scoring)
+organization: "Acme Corp"
+
+# Your expertise level: beginner | intermediate | advanced | expert
+# Affects how introductory vs advanced sessions are scored
+experience_level: "intermediate"
+
+# Topics you care about
+interests:
+  # Primary interests get highest weight in topic_alignment scoring
+  primary:
+    - "Kubernetes"
+    - "Cloud Native"
+    - "Containers"
+
+  # Secondary interests still contribute but with less weight
+  secondary:
+    - "Observability"
+    - "Security"
+
+# What you want to accomplish at the conference
+# These feed into strategic_value scoring
+priorities:
+  - "Learn best practices for container orchestration"
+  - "Network with other engineers"
+
+# Categories to exclude from scoring (case-insensitive)
+# Common exclusions: REGISTRATION, BREAKS, MEAL, LUNCH
+exclude_categories:
+  - "REGISTRATION"
+  - "BREAKS"
+
+# Preferences that adjust scoring behavior
+preferences:
+  # Boost hands-on workshops and labs
+  prefer_hands_on: false
+  # Boost deep technical talks over introductory ones
+  prefer_deep_dives: false
+  # Penalize vendor-heavy marketing/sales talks
+  avoid_vendor_pitches: false
+
+# Free-text context about your situation
+# The AI uses this for nuanced scoring decisions
+context: ""

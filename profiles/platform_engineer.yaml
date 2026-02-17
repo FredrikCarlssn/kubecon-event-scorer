@@ -1,0 +1,38 @@
+name: "Platform Engineer"
+role: "Senior Platform Engineer"
+organization: "Acme Corp"
+experience_level: "advanced"
+
+interests:
+  primary:
+    - "Platform engineering"
+    - "Kubernetes operators"
+    - "GitOps"
+    - "Internal developer platforms"
+  secondary:
+    - "Observability"
+    - "Security"
+    - "eBPF"
+    - "Service mesh"
+    - "CI/CD"
+
+priorities:
+  - "Evaluate tools for building an internal developer platform"
+  - "Learn multi-tenant Kubernetes patterns"
+  - "Understand platform engineering best practices"
+  - "Discover new approaches to developer experience"
+
+exclude_categories:
+  - "REGISTRATION"
+  - "BREAKS"
+
+preferences:
+  prefer_hands_on: true
+  prefer_deep_dives: true
+  avoid_vendor_pitches: true
+
+context: >
+  We run 50+ Kubernetes clusters across AWS and GCP, currently migrating
+  to a GitOps-based deployment model using Argo CD. Building an internal
+  developer platform with Backstage. Key challenges: multi-tenancy,
+  cost optimization, and reducing cognitive load for application developers.

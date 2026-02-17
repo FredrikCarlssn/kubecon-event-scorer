@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KubeCon EU 2026 - {{ profile.name }} Report</title>
+<style>
+  :root {
+    --green: #16a34a; --blue: #2563eb; --amber: #d97706;
+    --gray: #6b7280; --light-gray: #d1d5db;
+    --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b;
+    --border: #e2e8f0; --shadow: rgba(0,0,0,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1e40af, #7c3aed);
+    color: white; padding: 30px; border-radius: 12px; margin-bottom: 24px;
+  }
+  .header h1 { font-size: 1.8em; margin-bottom: 4px; }
+  .header .subtitle { opacity: 0.9; font-size: 1.1em; }
+  .stats {
+    display: flex; gap: 24px; margin-top: 16px; flex-wrap: wrap;
+  }
+  .stat { background: rgba(255,255,255,0.15); padding: 8px 16px; border-radius: 8px; }
+  .stat-value { font-size: 1.4em; font-weight: 700; }
+  .stat-label { font-size: 0.85em; opacity: 0.85; }
+
+  /* Filters */
+  .filters {
+    background: var(--card-bg); padding: 16px 20px; border-radius: 10px;
+    border: 1px solid var(--border); margin-bottom: 20px;
+    display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+  }
+  .filters label { font-weight: 600; font-size: 0.9em; white-space: nowrap; }
+  .filters input[type=range] { width: 120px; }
+  .filters input[type=text] {
+    padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px;
+    font-size: 0.9em; width: 200px;
+  }
+  .filters select {
+    padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px;
+    font-size: 0.9em;
+  }
+  .filter-group { display: flex; align-items: center; gap: 6px; }
+  .conflict-toggle { cursor: pointer; user-select: none; }
+
+  /* Day tabs */
+  .day-tabs {
+    display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .day-tab {
+    padding: 10px 20px; border-radius: 8px 8px 0 0; cursor: pointer;
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-bottom: none; font-weight: 600; font-size: 0.95em;
+    transition: all 0.2s;
+  }
+  .day-tab:hover { background: #eef2ff; }
+  .day-tab.active { background: #4f46e5; color: white; }
+  .day-content { display: none; }
+  .day-content.active { display: block; }
+
+  /* Timeslot */
+  .timeslot {
+    margin-bottom: 24px; border-left: 3px solid #4f46e5;
+    padding-left: 16px;
+  }
+  .timeslot-header {
+    font-size: 1.05em; font-weight: 700; color: #4f46e5;
+    margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+  }
+  .conflict-badge {
+    background: #fef2f2; color: #dc2626; padding: 2px 8px;
+    border-radius: 4px; font-size: 0.75em; font-weight: 600;
+  }
+
+  /* Event card */
+  .event-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px; margin-bottom: 10px;
+    box-shadow: 0 1px 3px var(--shadow); transition: all 0.2s;
+  }
+  .event-card:hover { box-shadow: 0 4px 12px var(--shadow); }
+  .event-card.conflict { border-left: 3px solid #dc2626; }
+  .event-top { display: flex; gap: 12px; align-items: flex-start; }
+
+  .score-badge {
+    min-width: 52px; height: 52px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3em; font-weight: 800; color: white; flex-shrink: 0;
+  }
+
+  .event-info { flex: 1; min-width: 0; }
+  .event-title {
+    font-size: 1.05em; font-weight: 700; margin-bottom: 4px;
+    word-wrap: break-word;
+  }
+  .event-title a { color: inherit; text-decoration: none; }
+  .event-title a:hover { text-decoration: underline; }
+  .event-meta {
+    display: flex; gap: 12px; flex-wrap: wrap; font-size: 0.85em;
+    color: var(--gray); margin-bottom: 8px;
+  }
+  .event-meta span { white-space: nowrap; }
+
+  /* Score breakdown */
+  .score-breakdown {
+    display: flex; gap: 12px; margin: 8px 0; flex-wrap: wrap;
+  }
+  .score-bar-group { flex: 1; min-width: 120px; }
+  .score-bar-label {
+    font-size: 0.75em; color: var(--gray); margin-bottom: 2px;
+    display: flex; justify-content: space-between;
+  }
+  .score-bar {
+    height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden;
+  }
+  .score-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+
+  .reasoning {
+    font-size: 0.9em; color: #475569; margin-top: 6px;
+    font-style: italic;
+  }
+
+  /* Expandable description */
+  .expand-btn {
+    background: none; border: none; color: var(--blue); cursor: pointer;
+    font-size: 0.85em; padding: 4px 0; font-weight: 600;
+  }
+  .expand-btn:hover { text-decoration: underline; }
+  .event-description {
+    display: none; margin-top: 8px; padding: 12px;
+    background: #f8fafc; border-radius: 6px; font-size: 0.9em;
+    white-space: pre-wrap; word-wrap: break-word; max-height: 300px;
+    overflow-y: auto;
+  }
+  .event-description.expanded { display: block; }
+
+  .category-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 0.75em; background: #eef2ff; color: #4338ca;
+    font-weight: 600;
+  }
+
+  .footer {
+    text-align: center; padding: 20px; color: var(--gray);
+    font-size: 0.85em;
+  }
+
+  .empty-state {
+    text-align: center; padding: 40px; color: var(--gray);
+    font-size: 1.1em;
+  }
+
+  @media (max-width: 768px) {
+    .container { padding: 12px; }
+    .header { padding: 20px; }
+    .header h1 { font-size: 1.3em; }
+    .stats { gap: 12px; }
+    .filters { flex-direction: column; align-items: stretch; }
+    .score-breakdown { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1>KubeCon + CloudNativeCon EU 2026</h1>
+    <div class="subtitle">Personalized Schedule for {{ profile.name }} ({{ profile.role }})</div>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value">{{ total_events }}</div>
+        <div class="stat-label">Events Scored</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">{{ must_attend }}</div>
+        <div class="stat-label">Must-Attend (85+)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">{{ recommended }}</div>
+        <div class="stat-label">Recommended (70+)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">{{ avg_score }}</div>
+        <div class="stat-label">Avg Score</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="filter-group">
+      <label>Min Score:</label>
+      <input type="range" id="scoreFilter" min="0" max="100" value="{{ min_score }}" oninput="filterEvents()">
+      <span id="scoreValue">{{ min_score }}</span>
+    </div>
+    <div class="filter-group">
+      <label>Search:</label>
+      <input type="text" id="searchFilter" placeholder="Search titles..." oninput="filterEvents()">
+    </div>
+    <div class="filter-group">
+      <label>Category:</label>
+      <select id="categoryFilter" onchange="filterEvents()">
+        <option value="">All Categories</option>
+        {% for cat in categories %}
+        <option value="{{ cat }}">{{ cat }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="conflict-toggle">
+        <input type="checkbox" id="conflictFilter" onchange="filterEvents()">
+        Highlight Conflicts
+      </label>
+    </div>
+  </div>
+
+  <!-- Day Tabs -->
+  <div class="day-tabs">
+    {% for day_key, day_info in days.items() %}
+    <div class="day-tab {% if loop.first %}active{% endif %}" onclick="switchDay('{{ day_key }}')">
+      {{ day_info.display }}
+      <span style="font-weight:400; font-size:0.85em;">({{ day_info.event_count }})</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Day Contents -->
+  {% for day_key, day_info in days.items() %}
+  <div class="day-content {% if loop.first %}active{% endif %}" id="day-{{ day_key }}">
+    {% if day_info.timeslots %}
+      {% for ts in day_info.timeslots %}
+      <div class="timeslot">
+        <div class="timeslot-header">
+          {{ ts.time_range }}
+          {% if ts.has_conflicts %}
+          <span class="conflict-badge">CONFLICT</span>
+          {% endif %}
+        </div>
+        {% for se in ts.events %}
+        <div class="event-card {% if ts.has_conflicts and ts.events|length > 1 %}conflict{% endif %}"
+             data-score="{{ se.score }}"
+             data-title="{{ se.event.summary|lower }}"
+             data-categories="{{ se.event.categories|join(',') }}">
+          <div class="event-top">
+            <div class="score-badge" style="background: {{ se.score_color }}">
+              {{ se.score }}
+            </div>
+            <div class="event-info">
+              <div class="event-title">
+                {% if se.event.url %}
+                <a href="{{ se.event.url }}" target="_blank" rel="noopener">{{ se.event.summary }}</a>
+                {% else %}
+                {{ se.event.summary }}
+                {% endif %}
+              </div>
+              <div class="event-meta">
+                <span>{{ se.event.time_range }}</span>
+                <span>{{ se.event.duration_minutes }} min</span>
+                {% if se.event.location %}<span>{{ se.event.location }}</span>{% endif %}
+                {% for cat in se.event.categories %}
+                <span class="category-tag">{{ cat }}</span>
+                {% endfor %}
+              </div>
+              <div class="score-breakdown">
+                <div class="score-bar-group">
+                  <div class="score-bar-label">
+                    <span>Role Relevance</span>
+                    <span>{{ se.role_relevance }}/35</span>
+                  </div>
+                  <div class="score-bar">
+                    <div class="score-bar-fill" style="width: {{ (se.role_relevance / 35 * 100)|round }}%; background: {{ se.score_color }};"></div>
+                  </div>
+                </div>
+                <div class="score-bar-group">
+                  <div class="score-bar-label">
+                    <span>Topic Alignment</span>
+                    <span>{{ se.topic_alignment }}/35</span>
+                  </div>
+                  <div class="score-bar">
+                    <div class="score-bar-fill" style="width: {{ (se.topic_alignment / 35 * 100)|round }}%; background: {{ se.score_color }};"></div>
+                  </div>
+                </div>
+                <div class="score-bar-group">
+                  <div class="score-bar-label">
+                    <span>Strategic Value</span>
+                    <span>{{ se.strategic_value }}/30</span>
+                  </div>
+                  <div class="score-bar">
+                    <div class="score-bar-fill" style="width: {{ (se.strategic_value / 30 * 100)|round }}%; background: {{ se.score_color }};"></div>
+                  </div>
+                </div>
+              </div>
+              {% if se.reasoning %}
+              <div class="reasoning">{{ se.reasoning }}</div>
+              {% endif %}
+              {% if se.event.description %}
+              <button class="expand-btn" onclick="toggleDesc(this)">Show description</button>
+              <div class="event-description">{{ se.event.description }}</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    {% else %}
+    <div class="empty-state">No events for this day.</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  <div class="footer">
+    Generated {{ generated_at }} | Profile: {{ profile.name }} | Provider: {{ provider_name }}
+  </div>
+</div>
+
+<script>
+function switchDay(day) {
+  document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.day-content').forEach(c => c.classList.remove('active'));
+  event.target.closest('.day-tab').classList.add('active');
+  document.getElementById('day-' + day).classList.add('active');
+}
+
+function filterEvents() {
+  const minScore = parseInt(document.getElementById('scoreFilter').value);
+  document.getElementById('scoreValue').textContent = minScore;
+  const search = document.getElementById('searchFilter').value.toLowerCase();
+  const category = document.getElementById('categoryFilter').value;
+  const highlightConflicts = document.getElementById('conflictFilter').checked;
+
+  document.querySelectorAll('.event-card').forEach(card => {
+    const score = parseInt(card.dataset.score);
+    const title = card.dataset.title;
+    const cats = card.dataset.categories;
+
+    let show = score >= minScore;
+    if (show && search) show = title.includes(search);
+    if (show && category) show = cats.includes(category);
+
+    card.style.display = show ? '' : 'none';
+
+    if (highlightConflicts && card.classList.contains('conflict')) {
+      card.style.borderLeftColor = '#dc2626';
+      card.style.borderLeftWidth = '4px';
+    } else {
+      card.style.borderLeftColor = '';
+      card.style.borderLeftWidth = '';
+    }
+  });
+
+  // Hide empty timeslots
+  document.querySelectorAll('.timeslot').forEach(ts => {
+    const visible = ts.querySelectorAll('.event-card[style=""], .event-card:not([style])');
+    const hidden = ts.querySelectorAll('.event-card[style*="display: none"]');
+    ts.style.display = (visible.length === 0 && hidden.length > 0) ? 'none' : '';
+  });
+}
+
+function toggleDesc(btn) {
+  const desc = btn.nextElementSibling;
+  const expanded = desc.classList.toggle('expanded');
+  btn.textContent = expanded ? 'Hide description' : 'Show description';
+}
+</script>
+</body>
+</html>
