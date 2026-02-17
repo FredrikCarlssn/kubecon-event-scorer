@@ -11,7 +11,7 @@ class GeminiProvider(AIProvider):
 
     @property
     def default_model(self) -> str:
-        return "gemini-3.0-pro"
+        return "gemini-3-pro-preview"
 
     @property
     def name(self) -> str:

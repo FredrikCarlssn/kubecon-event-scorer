@@ -13,6 +13,67 @@ from models import CET, Profile, ScoredEvent
 TEMPLATE_DIR = Path(__file__).parent / "templates"
 OUTPUT_DIR = Path(__file__).parent / "output"
 
+# Conflict group colors for visual distinction
+CONFLICT_COLORS = [
+    "#dc2626", "#2563eb", "#9333ea", "#ca8a04",
+    "#0891b2", "#c026d3", "#059669", "#e11d48",
+]
+
+
+def _build_conflict_groups(timeslot_events: list[ScoredEvent]) -> list[list[int]]:
+    """Build groups of mutually conflicting event indices."""
+    n = len(timeslot_events)
+    visited = [False] * n
+    groups = []
+
+    for i in range(n):
+        if visited[i]:
+            continue
+        group = [i]
+        visited[i] = True
+        for j in range(i + 1, n):
+            if visited[j]:
+                continue
+            # Check if j conflicts with any event already in group
+            for gi in group:
+                if timeslot_events[gi].event.conflicts_with(timeslot_events[j].event):
+                    group.append(j)
+                    visited[j] = True
+                    break
+        if len(group) > 1:
+            groups.append(group)
+
+    return groups
+
+
+def _annotate_conflicts(timeslot_events: list[ScoredEvent]) -> list[dict]:
+    """Annotate each event with conflict info for the template."""
+    groups = _build_conflict_groups(timeslot_events)
+
+    # Map event index -> (group_id, color, conflicting_titles)
+    conflict_map: dict[int, dict] = {}
+    for gid, group in enumerate(groups):
+        color = CONFLICT_COLORS[gid % len(CONFLICT_COLORS)]
+        titles = [timeslot_events[i].event.summary for i in group]
+        for idx in group:
+            others = [t for t in titles if t != timeslot_events[idx].event.summary]
+            conflict_map[idx] = {
+                "group_id": gid + 1,
+                "color": color,
+                "conflicts_with": others,
+                "group_size": len(group),
+                "best_in_group": idx == max(group, key=lambda i: timeslot_events[i].score),
+            }
+
+    annotated = []
+    for i, se in enumerate(timeslot_events):
+        info = conflict_map.get(i)
+        annotated.append({
+            "scored_event": se,
+            "conflict": info,
+        })
+    return annotated
+
 
 def generate_report(
     scored_events: list[ScoredEvent],
@@ -37,14 +98,26 @@ def generate_report(
     # Group by day and build timeslots per day
     by_day = group_by_day(scored_events)
 
+    total_conflicts = 0
     days = {}
     for day_key, day_events in by_day.items():
         timeslots = build_timeslots(day_events)
+        # Annotate each timeslot's events with conflict info
+        annotated_timeslots = []
+        for ts in timeslots:
+            annotated_events = _annotate_conflicts(ts.events)
+            conflict_count = sum(1 for ae in annotated_events if ae["conflict"])
+            total_conflicts += conflict_count
+            annotated_timeslots.append({
+                "timeslot": ts,
+                "events": annotated_events,
+                "conflict_count": conflict_count,
+            })
         display = day_events[0].event.day_display if day_events else day_key
         days[day_key] = {
             "display": display,
             "event_count": len(day_events),
-            "timeslots": timeslots,
+            "timeslots": annotated_timeslots,
         }
 
     # Collect all unique categories
@@ -63,6 +136,18 @@ def generate_report(
         else 0
     )
 
+    # Top picks per day (best non-conflicting schedule)
+    top_picks = {}
+    for day_key, day_events in by_day.items():
+        sorted_day = sorted(day_events, key=lambda se: -se.score)
+        picks = []
+        for se in sorted_day:
+            if se.score < 50:
+                continue
+            if not any(se.event.conflicts_with(p.event) for p in picks):
+                picks.append(se)
+        top_picks[day_key] = sorted(picks, key=lambda se: se.event.dtstart)
+
     # Render
     env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)), autoescape=True)
     template = env.get_template("report.html")
@@ -75,6 +160,8 @@ def generate_report(
         must_attend=must_attend,
         recommended=recommended,
         avg_score=avg_score,
+        total_conflicts=total_conflicts,
+        top_picks=top_picks,
         min_score=min_score,
         provider_name=provider_name,
         generated_at=datetime.now(CET).strftime("%Y-%m-%d %H:%M CET"),

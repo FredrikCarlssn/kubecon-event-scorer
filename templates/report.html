@@ -10,6 +10,7 @@
     --gray: #6b7280; --light-gray: #d1d5db;
     --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b;
     --border: #e2e8f0; --shadow: rgba(0,0,0,0.08);
+    --red: #dc2626;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -26,11 +27,37 @@
   .header h1 { font-size: 1.8em; margin-bottom: 4px; }
   .header .subtitle { opacity: 0.9; font-size: 1.1em; }
   .stats {
-    display: flex; gap: 24px; margin-top: 16px; flex-wrap: wrap;
+    display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap;
   }
   .stat { background: rgba(255,255,255,0.15); padding: 8px 16px; border-radius: 8px; }
   .stat-value { font-size: 1.4em; font-weight: 700; }
   .stat-label { font-size: 0.85em; opacity: 0.85; }
+
+  /* Score legend */
+  .legend {
+    background: var(--card-bg); padding: 12px 20px; border-radius: 10px;
+    border: 1px solid var(--border); margin-bottom: 16px;
+    display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+    font-size: 0.85em;
+  }
+  .legend-title { font-weight: 700; }
+  .legend-item { display: flex; align-items: center; gap: 4px; }
+  .legend-dot {
+    width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0;
+  }
+
+  /* View toggle */
+  .view-toggle {
+    display: flex; gap: 4px; background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 3px; margin-bottom: 16px; width: fit-content;
+  }
+  .view-btn {
+    padding: 6px 16px; border-radius: 6px; border: none; cursor: pointer;
+    font-size: 0.9em; font-weight: 600; background: transparent; color: var(--gray);
+    transition: all 0.2s;
+  }
+  .view-btn.active { background: #4f46e5; color: white; }
+  .view-btn:hover:not(.active) { background: #eef2ff; }
 
   /* Filters */
   .filters {
@@ -39,7 +66,7 @@
     display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
   }
   .filters label { font-weight: 600; font-size: 0.9em; white-space: nowrap; }
-  .filters input[type=range] { width: 120px; }
+  .filters input[type=range] { width: 140px; accent-color: #4f46e5; }
   .filters input[type=text] {
     padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px;
     font-size: 0.9em; width: 200px;
@@ -49,9 +76,46 @@
     font-size: 0.9em;
   }
   .filter-group { display: flex; align-items: center; gap: 6px; }
-  .conflict-toggle { cursor: pointer; user-select: none; }
+  .filter-toggle {
+    cursor: pointer; user-select: none; display: flex; align-items: center; gap: 4px;
+  }
+
+  /* Top Picks */
+  .top-picks-section {
+    display: none; margin-bottom: 24px;
+  }
+  .top-picks-section.active { display: block; }
+  .top-picks-day {
+    margin-bottom: 20px;
+  }
+  .top-picks-day h3 {
+    font-size: 1.1em; color: #4f46e5; margin-bottom: 10px;
+    padding-bottom: 6px; border-bottom: 2px solid #4f46e5;
+  }
+  .pick-card {
+    display: flex; gap: 12px; align-items: center; padding: 10px 14px;
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 8px; margin-bottom: 6px;
+    transition: all 0.2s;
+  }
+  .pick-card:hover { box-shadow: 0 2px 8px var(--shadow); }
+  .pick-score {
+    min-width: 42px; height: 42px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1em; font-weight: 800; color: white; flex-shrink: 0;
+  }
+  .pick-time {
+    font-size: 0.85em; color: var(--gray); font-weight: 600;
+    min-width: 100px;
+  }
+  .pick-title { font-weight: 600; flex: 1; }
+  .pick-title a { color: inherit; text-decoration: none; }
+  .pick-title a:hover { text-decoration: underline; }
+  .pick-location { font-size: 0.8em; color: var(--gray); min-width: 120px; text-align: right; }
 
   /* Day tabs */
+  .schedule-view { display: none; }
+  .schedule-view.active { display: block; }
   .day-tabs {
     display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap;
   }
@@ -68,33 +132,66 @@
 
   /* Timeslot */
   .timeslot {
-    margin-bottom: 24px; border-left: 3px solid #4f46e5;
-    padding-left: 16px;
+    margin-bottom: 28px; position: relative;
   }
   .timeslot-header {
     font-size: 1.05em; font-weight: 700; color: #4f46e5;
-    margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+    margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px; background: #eef2ff; border-radius: 8px;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .timeslot-event-count {
+    font-size: 0.8em; font-weight: 400; color: var(--gray);
   }
   .conflict-badge {
-    background: #fef2f2; color: #dc2626; padding: 2px 8px;
-    border-radius: 4px; font-size: 0.75em; font-weight: 600;
+    background: #fef2f2; color: var(--red); padding: 3px 10px;
+    border-radius: 6px; font-size: 0.75em; font-weight: 700;
+    display: flex; align-items: center; gap: 4px;
+    border: 1px solid #fecaca;
+  }
+
+  /* Conflict group wrapper */
+  .conflict-group {
+    border: 2px dashed #e5e7eb; border-radius: 12px; padding: 12px;
+    margin-bottom: 12px; position: relative;
+  }
+  .conflict-group-label {
+    position: absolute; top: -10px; left: 16px; padding: 0 8px;
+    background: var(--bg); font-size: 0.75em; font-weight: 700;
+    border-radius: 4px;
+  }
+  .conflict-group-recommendation {
+    font-size: 0.8em; padding: 6px 12px; border-radius: 6px;
+    margin-bottom: 8px; font-weight: 600;
   }
 
   /* Event card */
   .event-card {
     background: var(--card-bg); border: 1px solid var(--border);
-    border-radius: 10px; padding: 16px; margin-bottom: 10px;
+    border-radius: 10px; padding: 16px; margin-bottom: 8px;
     box-shadow: 0 1px 3px var(--shadow); transition: all 0.2s;
+    position: relative;
   }
+  .event-card:last-child { margin-bottom: 0; }
   .event-card:hover { box-shadow: 0 4px 12px var(--shadow); }
-  .event-card.conflict { border-left: 3px solid #dc2626; }
+  .event-card.has-conflict { border-left: 4px solid var(--red); }
+  .event-card.best-pick {
+    box-shadow: 0 0 0 2px #16a34a40, 0 2px 8px var(--shadow);
+  }
+  .best-pick-badge {
+    position: absolute; top: -8px; right: 12px; background: var(--green);
+    color: white; font-size: 0.7em; font-weight: 700; padding: 2px 8px;
+    border-radius: 4px;
+  }
   .event-top { display: flex; gap: 12px; align-items: flex-start; }
 
   .score-badge {
-    min-width: 52px; height: 52px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.3em; font-weight: 800; color: white; flex-shrink: 0;
+    min-width: 56px; height: 56px; border-radius: 10px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: white; flex-shrink: 0;
   }
+  .score-number { font-size: 1.4em; font-weight: 800; line-height: 1; }
+  .score-label { font-size: 0.55em; font-weight: 600; opacity: 0.9; text-transform: uppercase; }
 
   .event-info { flex: 1; min-width: 0; }
   .event-title {
@@ -102,55 +199,74 @@
     word-wrap: break-word;
   }
   .event-title a { color: inherit; text-decoration: none; }
-  .event-title a:hover { text-decoration: underline; }
+  .event-title a:hover { text-decoration: underline; color: #4f46e5; }
   .event-meta {
-    display: flex; gap: 12px; flex-wrap: wrap; font-size: 0.85em;
-    color: var(--gray); margin-bottom: 8px;
+    display: flex; gap: 8px; flex-wrap: wrap; font-size: 0.82em;
+    color: var(--gray); margin-bottom: 8px; align-items: center;
   }
-  .event-meta span { white-space: nowrap; }
+  .meta-item {
+    display: flex; align-items: center; gap: 3px; white-space: nowrap;
+  }
+  .meta-divider { color: var(--light-gray); }
+
+  /* Conflict info on card */
+  .conflict-info {
+    margin: 8px 0; padding: 8px 12px; border-radius: 6px;
+    font-size: 0.82em; display: flex; align-items: flex-start; gap: 6px;
+  }
+  .conflict-info-icon { flex-shrink: 0; font-size: 1.1em; }
+  .conflict-info-text { }
+  .conflict-info strong { }
 
   /* Score breakdown */
   .score-breakdown {
-    display: flex; gap: 12px; margin: 8px 0; flex-wrap: wrap;
+    display: flex; gap: 10px; margin: 8px 0; flex-wrap: wrap;
   }
-  .score-bar-group { flex: 1; min-width: 120px; }
+  .score-bar-group { flex: 1; min-width: 110px; }
   .score-bar-label {
-    font-size: 0.75em; color: var(--gray); margin-bottom: 2px;
+    font-size: 0.72em; color: var(--gray); margin-bottom: 2px;
     display: flex; justify-content: space-between;
   }
   .score-bar {
-    height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden;
+    height: 7px; background: #e5e7eb; border-radius: 4px; overflow: hidden;
   }
-  .score-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+  .score-bar-fill {
+    height: 100%; border-radius: 4px; transition: width 0.3s;
+  }
 
   .reasoning {
-    font-size: 0.9em; color: #475569; margin-top: 6px;
-    font-style: italic;
+    font-size: 0.88em; color: #475569; margin-top: 6px;
+    padding: 6px 10px; background: #f8fafc; border-radius: 6px;
+    border-left: 3px solid #cbd5e1;
   }
 
   /* Expandable description */
   .expand-btn {
     background: none; border: none; color: var(--blue); cursor: pointer;
-    font-size: 0.85em; padding: 4px 0; font-weight: 600;
+    font-size: 0.82em; padding: 4px 0; font-weight: 600;
   }
   .expand-btn:hover { text-decoration: underline; }
   .event-description {
     display: none; margin-top: 8px; padding: 12px;
-    background: #f8fafc; border-radius: 6px; font-size: 0.9em;
+    background: #f1f5f9; border-radius: 6px; font-size: 0.88em;
     white-space: pre-wrap; word-wrap: break-word; max-height: 300px;
-    overflow-y: auto;
+    overflow-y: auto; border: 1px solid var(--border);
   }
   .event-description.expanded { display: block; }
 
   .category-tag {
     display: inline-block; padding: 2px 8px; border-radius: 4px;
-    font-size: 0.75em; background: #eef2ff; color: #4338ca;
+    font-size: 0.72em; background: #eef2ff; color: #4338ca;
     font-weight: 600;
+  }
+
+  .no-conflict-card {
+    margin-bottom: 8px;
   }
 
   .footer {
     text-align: center; padding: 20px; color: var(--gray);
-    font-size: 0.85em;
+    font-size: 0.85em; margin-top: 20px;
   }
 
   .empty-state {
@@ -162,9 +278,11 @@
     .container { padding: 12px; }
     .header { padding: 20px; }
     .header h1 { font-size: 1.3em; }
-    .stats { gap: 12px; }
+    .stats { gap: 10px; }
     .filters { flex-direction: column; align-items: stretch; }
     .score-breakdown { flex-direction: column; }
+    .pick-card { flex-wrap: wrap; }
+    .pick-location { text-align: left; min-width: auto; }
   }
 </style>
 </head>
@@ -188,10 +306,33 @@
         <div class="stat-label">Recommended (70+)</div>
       </div>
       <div class="stat">
+        <div class="stat-value">{{ total_conflicts }}</div>
+        <div class="stat-label">Conflicts</div>
+      </div>
+      <div class="stat">
         <div class="stat-value">{{ avg_score }}</div>
         <div class="stat-label">Avg Score</div>
       </div>
     </div>
+  </div>
+
+  <!-- Score Legend -->
+  <div class="legend">
+    <span class="legend-title">Scores:</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#16a34a;"></span> 85+ Must-attend</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#2563eb;"></span> 70-84 Recommended</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#d97706;"></span> 50-69 Consider</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#6b7280;"></span> 30-49 Low</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#d1d5db;"></span> &lt;30 Skip</span>
+    <span style="margin-left: 12px;" class="legend-title">Conflicts:</span>
+    <span class="legend-item" style="border-left:4px solid var(--red); padding-left:6px;">Red border = time overlap</span>
+    <span class="legend-item" style="box-shadow: 0 0 0 2px #16a34a80; border-radius:4px; padding: 2px 6px;">Green glow = AI top pick</span>
+  </div>
+
+  <!-- View Toggle -->
+  <div class="view-toggle">
+    <button class="view-btn active" onclick="switchView('schedule')">Full Schedule</button>
+    <button class="view-btn" onclick="switchView('picks')">Top Picks (conflict-free)</button>
   </div>
 
   <!-- Filters -->
@@ -199,7 +340,7 @@
     <div class="filter-group">
       <label>Min Score:</label>
       <input type="range" id="scoreFilter" min="0" max="100" value="{{ min_score }}" oninput="filterEvents()">
-      <span id="scoreValue">{{ min_score }}</span>
+      <span id="scoreValue" style="min-width:24px; text-align:center; font-weight:700;">{{ min_score }}</span>
     </div>
     <div class="filter-group">
       <label>Search:</label>
@@ -215,107 +356,200 @@
       </select>
     </div>
     <div class="filter-group">
-      <label class="conflict-toggle">
-        <input type="checkbox" id="conflictFilter" onchange="filterEvents()">
-        Highlight Conflicts
+      <label class="filter-toggle">
+        <input type="checkbox" id="conflictOnlyFilter" onchange="filterEvents()">
+        Conflicts only
       </label>
     </div>
   </div>
 
-  <!-- Day Tabs -->
-  <div class="day-tabs">
-    {% for day_key, day_info in days.items() %}
-    <div class="day-tab {% if loop.first %}active{% endif %}" onclick="switchDay('{{ day_key }}')">
-      {{ day_info.display }}
-      <span style="font-weight:400; font-size:0.85em;">({{ day_info.event_count }})</span>
+  <!-- TOP PICKS VIEW -->
+  <div class="top-picks-section" id="view-picks">
+    <p style="color: var(--gray); font-size: 0.9em; margin-bottom: 16px;">
+      Your optimal conflict-free schedule: the highest-scoring sessions with no time overlaps.
+    </p>
+    {% for day_key, picks in top_picks.items() %}
+    {% if picks %}
+    <div class="top-picks-day">
+      <h3>{{ picks[0].event.day_display }} ({{ picks|length }} sessions)</h3>
+      {% for se in picks %}
+      <div class="pick-card">
+        <div class="pick-score" style="background: {{ se.score_color }}">{{ se.score }}</div>
+        <div class="pick-time">{{ se.event.time_range }}</div>
+        <div class="pick-title">
+          {% if se.event.url %}
+          <a href="{{ se.event.url }}" target="_blank" rel="noopener">{{ se.event.summary }}</a>
+          {% else %}
+          {{ se.event.summary }}
+          {% endif %}
+        </div>
+        <div class="pick-location">{{ se.event.location }}</div>
+      </div>
+      {% endfor %}
     </div>
+    {% endif %}
     {% endfor %}
   </div>
 
-  <!-- Day Contents -->
-  {% for day_key, day_info in days.items() %}
-  <div class="day-content {% if loop.first %}active{% endif %}" id="day-{{ day_key }}">
-    {% if day_info.timeslots %}
-      {% for ts in day_info.timeslots %}
-      <div class="timeslot">
-        <div class="timeslot-header">
-          {{ ts.time_range }}
-          {% if ts.has_conflicts %}
-          <span class="conflict-badge">CONFLICT</span>
-          {% endif %}
-        </div>
-        {% for se in ts.events %}
-        <div class="event-card {% if ts.has_conflicts and ts.events|length > 1 %}conflict{% endif %}"
-             data-score="{{ se.score }}"
-             data-title="{{ se.event.summary|lower }}"
-             data-categories="{{ se.event.categories|join(',') }}">
-          <div class="event-top">
-            <div class="score-badge" style="background: {{ se.score_color }}">
-              {{ se.score }}
-            </div>
-            <div class="event-info">
-              <div class="event-title">
-                {% if se.event.url %}
-                <a href="{{ se.event.url }}" target="_blank" rel="noopener">{{ se.event.summary }}</a>
-                {% else %}
-                {{ se.event.summary }}
-                {% endif %}
-              </div>
-              <div class="event-meta">
-                <span>{{ se.event.time_range }}</span>
-                <span>{{ se.event.duration_minutes }} min</span>
-                {% if se.event.location %}<span>{{ se.event.location }}</span>{% endif %}
-                {% for cat in se.event.categories %}
-                <span class="category-tag">{{ cat }}</span>
-                {% endfor %}
-              </div>
-              <div class="score-breakdown">
-                <div class="score-bar-group">
-                  <div class="score-bar-label">
-                    <span>Role Relevance</span>
-                    <span>{{ se.role_relevance }}/35</span>
-                  </div>
-                  <div class="score-bar">
-                    <div class="score-bar-fill" style="width: {{ (se.role_relevance / 35 * 100)|round }}%; background: {{ se.score_color }};"></div>
-                  </div>
-                </div>
-                <div class="score-bar-group">
-                  <div class="score-bar-label">
-                    <span>Topic Alignment</span>
-                    <span>{{ se.topic_alignment }}/35</span>
-                  </div>
-                  <div class="score-bar">
-                    <div class="score-bar-fill" style="width: {{ (se.topic_alignment / 35 * 100)|round }}%; background: {{ se.score_color }};"></div>
-                  </div>
-                </div>
-                <div class="score-bar-group">
-                  <div class="score-bar-label">
-                    <span>Strategic Value</span>
-                    <span>{{ se.strategic_value }}/30</span>
-                  </div>
-                  <div class="score-bar">
-                    <div class="score-bar-fill" style="width: {{ (se.strategic_value / 30 * 100)|round }}%; background: {{ se.score_color }};"></div>
-                  </div>
-                </div>
-              </div>
-              {% if se.reasoning %}
-              <div class="reasoning">{{ se.reasoning }}</div>
-              {% endif %}
-              {% if se.event.description %}
-              <button class="expand-btn" onclick="toggleDesc(this)">Show description</button>
-              <div class="event-description">{{ se.event.description }}</div>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-        {% endfor %}
+  <!-- FULL SCHEDULE VIEW -->
+  <div class="schedule-view active" id="view-schedule">
+    <!-- Day Tabs -->
+    <div class="day-tabs">
+      {% for day_key, day_info in days.items() %}
+      <div class="day-tab {% if loop.first %}active{% endif %}" onclick="switchDay('{{ day_key }}')">
+        {{ day_info.display }}
+        <span style="font-weight:400; font-size:0.85em;">({{ day_info.event_count }})</span>
       </div>
       {% endfor %}
-    {% else %}
-    <div class="empty-state">No events for this day.</div>
-    {% endif %}
+    </div>
+
+    <!-- Day Contents -->
+    {% for day_key, day_info in days.items() %}
+    <div class="day-content {% if loop.first %}active{% endif %}" id="day-{{ day_key }}">
+      {% if day_info.timeslots %}
+        {% for ts_info in day_info.timeslots %}
+        {% set ts = ts_info.timeslot %}
+        {% set events = ts_info.events %}
+        <div class="timeslot" data-has-conflicts="{{ 'true' if ts_info.conflict_count > 0 else 'false' }}">
+          <div class="timeslot-header">
+            {{ ts.time_range }}
+            <span class="timeslot-event-count">{{ events|length }} session{{ 's' if events|length != 1 }}</span>
+            {% if ts_info.conflict_count > 0 %}
+            <span class="conflict-badge">
+              {{ ts_info.conflict_count }} OVERLAPPING
+            </span>
+            {% endif %}
+          </div>
+
+          {# Group conflicting events together, show non-conflicting ones individually #}
+          {% set ns = namespace(shown=[], current_group=-1) %}
+          {% for ae in events %}
+            {% set se = ae.scored_event %}
+            {% set conf = ae.conflict %}
+
+            {% if conf %}
+              {# Start a new conflict group if this is a new group_id #}
+              {% if conf.group_id != ns.current_group %}
+                {% if ns.current_group != -1 %}</div>{% endif %}
+                {% set ns.current_group = conf.group_id %}
+                <div class="conflict-group" style="border-color: {{ conf.color }}40;">
+                  <span class="conflict-group-label" style="color: {{ conf.color }};">
+                    Choose 1 of {{ conf.group_size }}
+                  </span>
+                  <div class="conflict-group-recommendation" style="background: {{ conf.color }}10; color: {{ conf.color }};">
+                    AI recommends: {{ events[0].scored_event.event.summary if conf.best_in_group else se.event.summary }}
+                  </div>
+              {% endif %}
+              <div class="event-card has-conflict {% if conf.best_in_group %}best-pick{% endif %}"
+                   style="border-left-color: {{ conf.color }};"
+                   data-score="{{ se.score }}"
+                   data-title="{{ se.event.summary|lower }}"
+                   data-categories="{{ se.event.categories|join(',') }}"
+                   data-conflict="true">
+                {% if conf.best_in_group %}
+                <div class="best-pick-badge">TOP PICK</div>
+                {% endif %}
+            {% else %}
+              {# Close any open conflict group #}
+              {% if ns.current_group != -1 %}
+                </div>
+                {% set ns.current_group = -1 %}
+              {% endif %}
+              <div class="no-conflict-card">
+              <div class="event-card"
+                   data-score="{{ se.score }}"
+                   data-title="{{ se.event.summary|lower }}"
+                   data-categories="{{ se.event.categories|join(',') }}"
+                   data-conflict="false">
+            {% endif %}
+
+                <div class="event-top">
+                  <div class="score-badge" style="background: {{ se.score_color }}">
+                    <span class="score-number">{{ se.score }}</span>
+                    <span class="score-label">{{ se.score_tier }}</span>
+                  </div>
+                  <div class="event-info">
+                    <div class="event-title">
+                      {% if se.event.url %}
+                      <a href="{{ se.event.url }}" target="_blank" rel="noopener">{{ se.event.summary }}</a>
+                      {% else %}
+                      {{ se.event.summary }}
+                      {% endif %}
+                    </div>
+                    <div class="event-meta">
+                      <span class="meta-item">{{ se.event.time_range }}</span>
+                      <span class="meta-divider">|</span>
+                      <span class="meta-item">{{ se.event.duration_minutes }} min</span>
+                      {% if se.event.location %}
+                      <span class="meta-divider">|</span>
+                      <span class="meta-item">{{ se.event.location }}</span>
+                      {% endif %}
+                      {% for cat in se.event.categories %}
+                      <span class="category-tag">{{ cat }}</span>
+                      {% endfor %}
+                    </div>
+
+                    {% if conf %}
+                    <div class="conflict-info" style="background: {{ conf.color }}08; border: 1px solid {{ conf.color }}20;">
+                      <span class="conflict-info-icon" style="color: {{ conf.color }};">&#x26A0;</span>
+                      <span class="conflict-info-text">
+                        <strong style="color: {{ conf.color }};">Conflicts with:</strong>
+                        {{ conf.conflicts_with|join(', ') }}
+                      </span>
+                    </div>
+                    {% endif %}
+
+                    <div class="score-breakdown">
+                      <div class="score-bar-group">
+                        <div class="score-bar-label">
+                          <span>Role Relevance</span>
+                          <span>{{ se.role_relevance }}/35</span>
+                        </div>
+                        <div class="score-bar">
+                          <div class="score-bar-fill" style="width: {{ (se.role_relevance / 35 * 100)|round }}%; background: {{ se.score_color }};"></div>
+                        </div>
+                      </div>
+                      <div class="score-bar-group">
+                        <div class="score-bar-label">
+                          <span>Topic Alignment</span>
+                          <span>{{ se.topic_alignment }}/35</span>
+                        </div>
+                        <div class="score-bar">
+                          <div class="score-bar-fill" style="width: {{ (se.topic_alignment / 35 * 100)|round }}%; background: {{ se.score_color }};"></div>
+                        </div>
+                      </div>
+                      <div class="score-bar-group">
+                        <div class="score-bar-label">
+                          <span>Strategic Value</span>
+                          <span>{{ se.strategic_value }}/30</span>
+                        </div>
+                        <div class="score-bar">
+                          <div class="score-bar-fill" style="width: {{ (se.strategic_value / 30 * 100)|round }}%; background: {{ se.score_color }};"></div>
+                        </div>
+                      </div>
+                    </div>
+                    {% if se.reasoning %}
+                    <div class="reasoning">{{ se.reasoning }}</div>
+                    {% endif %}
+                    {% if se.event.description %}
+                    <button class="expand-btn" onclick="toggleDesc(this)">Show full description</button>
+                    <div class="event-description">{{ se.event.description }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              {% if not conf %}</div>{% endif %}
+          {% endfor %}
+          {# Close last conflict group if open #}
+          {% if ns.current_group != -1 %}</div>{% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+      <div class="empty-state">No events for this day.</div>
+      {% endif %}
+    </div>
+    {% endfor %}
   </div>
-  {% endfor %}
 
   <div class="footer">
     Generated {{ generated_at }} | Profile: {{ profile.name }} | Provider: {{ provider_name }}
@@ -323,6 +557,13 @@
 </div>
 
 <script>
+function switchView(view) {
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('view-schedule').classList.toggle('active', view === 'schedule');
+  document.getElementById('view-picks').classList.toggle('active', view === 'picks');
+}
+
 function switchDay(day) {
   document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.day-content').forEach(c => c.classList.remove('active'));
@@ -335,40 +576,46 @@ function filterEvents() {
   document.getElementById('scoreValue').textContent = minScore;
   const search = document.getElementById('searchFilter').value.toLowerCase();
   const category = document.getElementById('categoryFilter').value;
-  const highlightConflicts = document.getElementById('conflictFilter').checked;
+  const conflictOnly = document.getElementById('conflictOnlyFilter').checked;
 
   document.querySelectorAll('.event-card').forEach(card => {
     const score = parseInt(card.dataset.score);
-    const title = card.dataset.title;
-    const cats = card.dataset.categories;
+    const title = card.dataset.title || '';
+    const cats = card.dataset.categories || '';
+    const isConflict = card.dataset.conflict === 'true';
 
     let show = score >= minScore;
     if (show && search) show = title.includes(search);
     if (show && category) show = cats.includes(category);
+    if (show && conflictOnly) show = isConflict;
 
     card.style.display = show ? '' : 'none';
+  });
 
-    if (highlightConflicts && card.classList.contains('conflict')) {
-      card.style.borderLeftColor = '#dc2626';
-      card.style.borderLeftWidth = '4px';
-    } else {
-      card.style.borderLeftColor = '';
-      card.style.borderLeftWidth = '';
-    }
+  // Hide empty conflict groups
+  document.querySelectorAll('.conflict-group').forEach(group => {
+    const visible = group.querySelectorAll('.event-card:not([style*="display: none"])');
+    group.style.display = visible.length === 0 ? 'none' : '';
+  });
+
+  // Hide empty no-conflict wrappers
+  document.querySelectorAll('.no-conflict-card').forEach(wrap => {
+    const card = wrap.querySelector('.event-card');
+    if (card) wrap.style.display = card.style.display;
   });
 
   // Hide empty timeslots
   document.querySelectorAll('.timeslot').forEach(ts => {
-    const visible = ts.querySelectorAll('.event-card[style=""], .event-card:not([style])');
-    const hidden = ts.querySelectorAll('.event-card[style*="display: none"]');
-    ts.style.display = (visible.length === 0 && hidden.length > 0) ? 'none' : '';
+    const cards = ts.querySelectorAll('.event-card');
+    const anyVisible = Array.from(cards).some(c => c.style.display !== 'none');
+    ts.style.display = anyVisible ? '' : 'none';
   });
 }
 
 function toggleDesc(btn) {
   const desc = btn.nextElementSibling;
   const expanded = desc.classList.toggle('expanded');
-  btn.textContent = expanded ? 'Hide description' : 'Show description';
+  btn.textContent = expanded ? 'Hide description' : 'Show full description';
 }
 </script>
 </body>
